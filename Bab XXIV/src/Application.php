@@ -6,6 +6,9 @@ use BelajarOOP\Framework\Http\Kernel;
 
 class Application extends Kernel
 {
+    const PRE_REQUEST_EVENT = 'kernel.request';
+    const PRE_RESPONSE_EVENT = 'kernel.response';
+
     protected $configs;
 
     public function __construct(array $configs = array())

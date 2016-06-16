@@ -2,6 +2,11 @@
 
 namespace BelajarOOP\Framework\Http;
 
+use BelajarOOP\Framework\Application;
+use BelajarOOP\Framework\Event\FilterRequestEvent;
+use BelajarOOP\Framework\Event\FilterResponseEvent;
+use InvalidArgumentException;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
@@ -15,14 +20,29 @@ class Kernel implements HttpKernelInterface
 {
     private $router;
 
+    private $eventDispatcher;
+
     public function __construct()
     {
         //Symfony Route Collection
         $this->router = new RouteCollection();
+
+        //Event Dispatcher
+        $this->eventDispatcher = new EventDispatcher();
     }
 
     public function handle(Request $request, $type = self::MASTER_REQUEST, $catch = true)
     {
+        $filterRequest = new FilterRequestEvent();
+        $filterRequest->setRequest($request);
+
+        //Add Filter Query Event
+        $this->eventDispatcher->dispatch(Application::PRE_REQUEST_EVENT, $filterRequest);
+
+        if ($response = $filterRequest->getResponse()) {
+            return $response;
+        }
+
         //Request Context
         $context = new RequestContext();
         $context->fromRequest($request);
@@ -41,6 +61,14 @@ class Kernel implements HttpKernelInterface
 
             //Make it simple, use call_user_func_array to calling controller and passing attributes as parameter
             $response = call_user_func_array($controller, $attributes);
+
+            $filterResponse = new FilterResponseEvent();
+            $filterResponse->setResponse($response);
+
+            //Add Filter Response Event
+            $this->eventDispatcher->dispatch(Application::PRE_RESPONSE_EVENT, $filterResponse);
+
+            $response = $filterResponse->getResponse();
         } catch (ResourceNotFoundException $e) {
             $response = new Response('Not found!', Response::HTTP_NOT_FOUND);
         }
@@ -57,5 +85,14 @@ class Kernel implements HttpKernelInterface
             $path,
             array('_controller' => $controller)
         ));
+    }
+
+    public function on($event, $callback)
+    {
+        if (! is_callable($callback)) {
+            throw new InvalidArgumentException(sprintf('%s is not callable.', $callback));
+        }
+
+        $this->eventDispatcher->addListener($event, $callback);
     }
 }
