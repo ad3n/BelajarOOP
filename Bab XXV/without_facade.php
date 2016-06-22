@@ -28,5 +28,3 @@ $adminFee->calculate();
 $shippingFee = new ShippingFee();
 $shippingFee->setProduct($product);
 $shippingFee->calculate();
-
-
