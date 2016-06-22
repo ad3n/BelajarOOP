@@ -1,0 +1,14 @@
+{
+    "name": "belajar-oop/framework",
+    "require": {
+        "symfony/http-foundation": "3.*",
+        "symfony/http-kernel": "3.*",
+        "symfony/routing": "3.*",
+        "symfony/event-dispatcher": "3.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "BelajarOOP\\Framework\\": "src/"
+        }
+    }
+}

@@ -2,19 +2,21 @@
 
 require __DIR__.'/vendor/autoload.php';
 
-use Factory\Factory;
+use ObserverPattern\Subject;
+use ObserverPattern\Observer;
+use ObserverPattern\OtherObserver;
 
-$factory = new Factory();
-$sepeda = $factory->create('sepeda');
-$motor = $factory->create('motor');
-$mobil = $factory->create('mobil');
+$subject = new Subject('Mawar');
 
-echo $sepeda->gas();
-echo PHP_EOL;
+$observer = new Observer();
+$otherObserver = new OtherObserver();
 
-echo $motor->gas();
-echo PHP_EOL;
+$subject->attach($observer);
+$subject->attach($otherObserver);
 
-echo $mobil->gas();
-echo PHP_EOL;
+$subject->update('Pergi ke kampus');
+$subject->update('Pergi ke kantin');
 
+$subject->detach($otherObserver);
+
+$subject->update('Pulang kuliah');
